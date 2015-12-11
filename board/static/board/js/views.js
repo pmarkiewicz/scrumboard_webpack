@@ -2,7 +2,7 @@ define([
 	'jquery',
 	'backbone',
 	'underscore',
-	'js/model',
+	'js/models',
 	'js/config'
 ], function ($, Backbone, _, models, cfg) {
 	"use strict";
@@ -66,7 +66,7 @@ define([
 		},
 
 		failure: function (xhr, status, error) {
-			var errors = xhr.responseJSON;
+			var errors = xhr.responseJSON || [{msg: xhr.statusText}];
 			this.showErrors(errors);
 		},
 
@@ -96,7 +96,7 @@ define([
 
 			$.post(cfg.apiLogin, data)
 				.success($.proxy(this.loginSuccess, this))
-				.fail($.proxy(this.loginFailure, this));
+				.fail($.proxy(this.failure, this));
 		},
 
 		loginSuccess: function (data) {

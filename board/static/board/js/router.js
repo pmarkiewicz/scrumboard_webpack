@@ -14,7 +14,7 @@ define([
 			initialize: function (options) {
 				this.contentElement = '#content';
 				this.current = null;
-
+				//Backbone.history.start();
 			},
 
 			home: function () {
@@ -27,13 +27,13 @@ define([
 				// Override default route to enforce login on every page
 				var login;
 
-				callback = callback || this[name];
+				callback = callback || this[name];	// if there is no callback we retrieve one based on name
 
-				callback = _.wrap(callback, function(original) {
-					var args = _.without(arguments, original);
+				callback = _.wrap(callback, function(original_func) {
+					var args = _.without(arguments, original_func);	// removes original func from params list
 
 					if (models.session.authenticated()) {
-						original.apply(this, args);
+						original_func.apply(this, args);
 					}
 					else {
 						$(this.contentElement).hide();
@@ -41,7 +41,12 @@ define([
 						login = new views.LoginView();
 						$(this.contentElement).after(login.el);
 
+						login.on('done', function() {
+							$(this.contentElement).show();
+							original_func.apply(this, args);
+						});
 
+						login.render();
 					}
 				});
 
@@ -50,6 +55,7 @@ define([
 
 			render: function (view) {
 				if (this.current) {
+					this.current.undelegateEvents();
 					this.current.$el = $();
 					this.current.remove();
 				}
