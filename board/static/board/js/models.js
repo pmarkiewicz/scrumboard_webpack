@@ -5,19 +5,34 @@ define([
 ], function ($, Backbone, Cookies) {
 	"use strict";
 
+	var csrftoken = Cookies.get('csrftoken');
+
+	// code form djando documentation
 	function csrfSafeMethod(method) {
 		// these HTTP methods do not require CSRF protection
 		return (/^(GET|HEAD|OPTIONS|TRACE)$/i.test(method));
 	}
 
-	$.ajaxPrefilter(function (settings, originalOptions, xhr) {
-		var csrftoken;
+	// code form djando documentation
+	function sameOrigin(url) {
+		// test that a given url is a same-origin URL
+		// url could be relative or scheme relative or absolute
+		var host = document.location.host; // host + port
+		var protocol = document.location.protocol;
+		var sr_origin = '//' + host;
+		var origin = protocol + sr_origin;
+		// Allow absolute or scheme relative URLs to same origin
+		return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+			(url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+				// or any other URL that isn't scheme relative or absolute i.e relative.
+			!(/^(\/\/|http:|https:).*/.test(url));
+	}
 
-		if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+	$.ajaxPrefilter(function (settings, originalOptions, xhr) {
+		if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
 			// Send the token to same-origin, relative URLs only.
 			// Send the token only if the method warrants CSRF protection
 			// Using the CSRFToken value acquired earlier
-			csrftoken = Cookies.get('csrftoken');
 			xhr.setRequestHeader('X-CSRFToken', csrftoken);
 		}
 	});
