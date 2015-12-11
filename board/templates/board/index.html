@@ -24,10 +24,19 @@
 		</form>
 	</script>
 
+	<script type="text/html" id="header-template">
+		<span class="title">Scrum Board Example</span>
+		<% if (authenticated ) { %>
+		<nav>
+			<a href="/" class="button">Your Sprints</a>
+			<a href="#" class="logout button">Logout</a>
+		</nav>
+		<% } %>
+	</script>
 </head>
 <body>
 
-<div id="content"></div>
+<div id="content">CONTENT</div>
 
 <script id="config" type="text/json">
 	{
@@ -38,6 +47,7 @@
 		"apiRoot": "{% url 'api-root' %}",
  		"apiLogin": "{% url 'api-token' %}"
 	}
+
 
 </script>
 <script async src="{% static 'board/vendor/require.js' %}" data-main="{% static 'board/js/app.js' %}"></script>

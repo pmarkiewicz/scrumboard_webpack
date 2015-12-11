@@ -14,7 +14,10 @@ define([
 			initialize: function (options) {
 				this.contentElement = '#content';
 				this.current = null;
-				//Backbone.history.start();
+				this.header = new views.HeaderView();
+				$('body').prepend(this.header.el);
+				this.header.render();
+				Backbone.history.start();
 			},
 
 			home: function () {
@@ -42,6 +45,7 @@ define([
 						$(this.contentElement).after(login.el);
 
 						login.on('done', function() {
+							this.header.render();
 							$(this.contentElement).show();
 							original_func.apply(this, args);
 						});

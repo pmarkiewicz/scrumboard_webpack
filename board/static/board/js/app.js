@@ -24,5 +24,5 @@ require([
 	"use strict";
 
 	var router = new router.Router();
-	Backbone.history.start();
+	//Backbone.history.start();
 });

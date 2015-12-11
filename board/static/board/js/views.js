@@ -105,6 +105,26 @@ define([
 		}
 	});
 
-	return {HomepageView: HomepageView, LoginView: LoginView};
+	var HeaderView = TemplateView.extend({
+		tagName: 'header',
+		className: 'nav-header',
+		templateName: '#header-template',
+
+		events: {
+			'click a.logout': 'logout'
+		},
+
+		getContext: function() {
+			return {authenticated: models.session.authenticated()};
+		},
+
+		logout: function(ev) {
+			ev.preventDefault();
+			models.session.delete();
+			window.location = '/';
+		}
+	});
+
+	return {HomepageView: HomepageView, LoginView: LoginView, HeaderView: HeaderView};
 
 });
