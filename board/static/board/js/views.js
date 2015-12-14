@@ -38,7 +38,7 @@ define([
 
 		showErrors: function (errors) {
 			_.map(errors, function (fieldErrors, name) {
-				var field = $(':input[name=' + name + ']', this.form);
+				var field = $(':input[name="' + name + '"]', this.form);
 				var label = $('label[for=' + field.attr('id') + ']', this.form);
 
 				if (label.length === 0) {

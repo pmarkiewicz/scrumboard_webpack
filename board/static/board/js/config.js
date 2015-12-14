@@ -6,5 +6,5 @@ define([
 	var config = $('#config');
 	var cfg = JSON.parse(config.text());
 
-	return {cfg: cfg};
+	return cfg;
 });

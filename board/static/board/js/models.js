@@ -1,8 +1,9 @@
 define([
 	'jquery',
 	'backbone',
+	'js/config',
 	'vendor/js.cookie'
-], function ($, Backbone, Cookies) {
+], function ($, Backbone, cfg, Cookies) {
 	"use strict";
 
 	var csrftoken = Cookies.get('csrftoken');
@@ -83,5 +84,42 @@ define([
 		}
 	});
 
-	return {"session": new Session()};
+	var Sprint = Backbone.Model.extend({});
+	var Task = Backbone.Model.extend({});
+	var User = Backbone.Model.extend({});
+
+	var Sprints = Backbone.Collection.extend({
+		model: Sprint,
+		url: cfg.sprints
+	});
+
+	var sprints = new Sprints();
+
+	var Tasks = Backbone.Collection.extend({
+		model: Task,
+		url: cfg.tasks
+	});
+
+	var tasks = new Tasks();
+
+	var Users = Backbone.Collection.extend({
+		model: User,
+		url: cfg.users
+	});
+
+	var users = new Users();
+
+	return {
+		session: new Session(),
+		models: {
+			Sprint: Sprint,
+			Task: Task,
+			User: User
+		},
+		collections: {
+			sprints: sprints,
+			tasks: tasks,
+			users: users
+		}
+	};
 });

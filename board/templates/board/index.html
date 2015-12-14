@@ -7,7 +7,8 @@
 	<title>Scrum Board</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-
+	<link rel="stylesheet" href="{% static 'board/vendor/normalize.css' %}">
+	<link rel="stylesheet" href="{% static 'board/css/board.css' %}">
 	<script type="text/html" id="home-template">
 		<h1>Welcome to my Scrum Board Project!</h1>
 	</script>
@@ -47,6 +48,7 @@
 		"apiRoot": "{% url 'api-root' %}",
  		"apiLogin": "{% url 'api-token' %}"
 	}
+
 
 
 </script>

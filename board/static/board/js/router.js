@@ -48,7 +48,7 @@ define([
 							this.header.render();
 							$(this.contentElement).show();
 							original_func.apply(this, args);
-						});
+						}, this);
 
 						login.render();
 					}
