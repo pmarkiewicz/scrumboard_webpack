@@ -7,6 +7,7 @@ define([
 	"use strict";
 
 	var csrftoken = Cookies.get('csrftoken');
+	var models = {};
 
 	// code form djando documentation
 	function csrfSafeMethod(method) {
@@ -84,42 +85,38 @@ define([
 		}
 	});
 
-	var Sprint = Backbone.Model.extend({});
-	var Task = Backbone.Model.extend({});
-	var User = Backbone.Model.extend({});
+	models.session = new Session();
 
-	var Sprints = Backbone.Collection.extend({
-		model: Sprint,
-		url: cfg.sprints
-	});
-
-	var sprints = new Sprints();
-
-	var Tasks = Backbone.Collection.extend({
-		model: Task,
-		url: cfg.tasks
-	});
-
-	var tasks = new Tasks();
-
-	var Users = Backbone.Collection.extend({
-		model: User,
-		url: cfg.users
-	});
-
-	var users = new Users();
-
-	return {
-		session: new Session(),
-		models: {
-			Sprint: Sprint,
-			Task: Task,
-			User: User
-		},
-		collections: {
-			sprints: sprints,
-			tasks: tasks,
-			users: users
-		}
+	models.models = {
+		Sprint: Backbone.Model.extend({}),
+		Task: Backbone.Model.extend({}),
+		User: Backbone.Model.extend({}),
 	};
+
+	models.collections = {};
+	models.collections.ready = $.getJSON(cfg.apiRoot);	// load configuration of urls
+ 	models.collections.ready.done(function (data) {
+		models.collections.Sprints = Backbone.Collection.extend({
+			model: models.models.Sprint,
+			url: data.sprints
+		});
+
+		models.sprints = new models.collections.Sprints();
+
+		models.collections.Tasks = Backbone.Collection.extend({
+			model: models.models.Task,
+			url: data.tasks
+		});
+
+		models.tasks = new models.collections.Tasks();
+
+		models.collections.Users = Backbone.Collection.extend({
+			model: models.models.User,
+			url: data.users
+		});
+
+		models.users = new models.collections.Users();
+	});
+
+	return models;
 });
