@@ -70,18 +70,60 @@ define([
 			this.showErrors(errors);
 		},
 
-		done: function(ev) {
+		done: function (ev) {
 			if (ev) {
 				ev.preventDefault();
 			}
 
 			this.trigger('done');
 			this.remove();
+		},
+
+		modelFailure: function (xhr, status, error) {
+			var errors = xhr.responseJSON || [{msg: xhr.statusText}];
+			this.showErrors(errors);
 		}
 	});
 
 	var HomepageView = TemplateView.extend({
-		templateName: "#home-template"
+		templateName: "#home-template",
+
+		events: {
+			'click button.add': 'renderAddForm'
+		},
+
+		initialize: function (options) {
+			TemplateView.prototype.initialize.apply(this, arguments);
+
+			models.collections.ready.done(function () {
+				var end = new Date();
+				end.setDate(end.getDate() - 7);
+				end = end.toISOString().replace(/T.*/g, '');
+
+				models.sprints.fetch({
+					data: {end_min: end},
+					success: $.proxy(this.render, this)
+				});
+
+			}, this);
+		},
+
+		getContext: function () {
+			return {sprints: models.sprints};
+		},
+
+		renderAddForm: function(ev) {
+			var view = new NewSprintView();
+			var link = $(ev.currentTarget);
+
+			ev.preventDefault();
+			link.before(view.el);
+			link.hide();
+			view.render();
+			view.on("done", function() {
+				link.show();
+			})
+		}
 	});
 
 	var LoginView = FormView.extend({
@@ -114,17 +156,72 @@ define([
 			'click a.logout': 'logout'
 		},
 
-		getContext: function() {
+		getContext: function () {
 			return {authenticated: models.session.authenticated()};
 		},
 
-		logout: function(ev) {
+		logout: function (ev) {
 			ev.preventDefault();
 			models.session.delete();
 			window.location = '/';
 		}
 	});
 
-	return {HomepageView: HomepageView, LoginView: LoginView, HeaderView: HeaderView};
+	var NewSprintView = FormView.extend({
+		templateName: '#new-sprint-template',
+		className: 'new-sprint',
+
+		events: _.extend(
+			{
+				'click button.cancel': 'done'
+			},
+			FormView.prototype.events		// also handle a cancel button to call the done method defined by the FormView.
+		),
+
+		submit: function (ev) {
+			var attributes = {};
+
+			FormView.prototype.submit.apply(this, arguments);
+			attributes = this.serializeForm(this.form);
+			models.collections.ready.done(function () {
+				models.sprints.create(attributes, {
+					wait: true,
+					success: $.proxy(this.success, this),
+					error: $.proxy(this.modelFailure, this)
+				});
+			}, this);
+		},
+
+		success: function (model) {
+			this.done();
+			window.location.hash = '#sprint/' + model.get('id');
+		}
+	});
+
+	var SprintView = TemplateView.extend({
+		templateName: '#sprint-template',
+
+		initialize:function() {
+			TemplateView.prototype.initialize.apply(this, arguments);	// call base "class"
+			this.sprintId = options.sprintId;
+			this.sprint = null;
+
+			models.collections.ready.done(function () {
+				this.sprint = models.sprints.push({id: sprintId});
+
+				this.sprint.fetch({
+					success: function () {
+						this.render();
+					}
+				});
+			}, this);
+		},
+
+		getContext: function() {
+			return {sprint: this.sprint};
+		}
+	});
+
+	return {HomepageView: HomepageView, LoginView: LoginView, HeaderView: HeaderView, NewSprintView: NewSprintView, SprintView: SprintView};
 
 });

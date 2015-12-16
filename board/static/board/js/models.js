@@ -2,40 +2,21 @@ define([
 	'jquery',
 	'backbone',
 	'js/config',
-	'vendor/js.cookie'
-], function ($, Backbone, cfg, Cookies) {
+], function ($, Backbone, cfg) {
 	"use strict";
 
-	var csrftoken = Cookies.get('csrftoken');
 	var models = {};
 
-	// code form djando documentation
-	function csrfSafeMethod(method) {
-		// these HTTP methods do not require CSRF protection
-		return (/^(GET|HEAD|OPTIONS|TRACE)$/i.test(method));
-	}
+	var BaseModel = Backbone.Model.extend({
+		url: function () {
+			var links = this.get('links');
+			var url = links && links.self;
 
-	// code form djando documentation
-	function sameOrigin(url) {
-		// test that a given url is a same-origin URL
-		// url could be relative or scheme relative or absolute
-		var host = document.location.host; // host + port
-		var protocol = document.location.protocol;
-		var sr_origin = '//' + host;
-		var origin = protocol + sr_origin;
-		// Allow absolute or scheme relative URLs to same origin
-		return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
-			(url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
-				// or any other URL that isn't scheme relative or absolute i.e relative.
-			!(/^(\/\/|http:|https:).*/.test(url));
-	}
+			if (!url) {
+				url = Backbone.Model.prototype.url.call(this);
+			}
 
-	$.ajaxPrefilter(function (settings, originalOptions, xhr) {
-		if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
-			// Send the token to same-origin, relative URLs only.
-			// Send the token only if the method warrants CSRF protection
-			// Using the CSRFToken value acquired earlier
-			xhr.setRequestHeader('X-CSRFToken', csrftoken);
+			return url;
 		}
 	});
 
@@ -88,29 +69,44 @@ define([
 	models.session = new Session();
 
 	models.models = {
-		Sprint: Backbone.Model.extend({}),
-		Task: Backbone.Model.extend({}),
-		User: Backbone.Model.extend({}),
+		Sprint: BaseModel.extend({}),
+		Task: BaseModel.extend({}),
+		User: BaseModel.extend({
+			idAttributemodel: 'username'
+		}),
 	};
+
+	var BaseCollection = Backbone.Collection.extend({
+		initialize: function (options) {
+			console.log('init', this.url);
+		},
+
+		parse: function (response) {
+			this._next = response.next;
+			this._prev = response.previous;
+			this._count = response.count;
+			return response.result || [];
+		}
+	});
 
 	models.collections = {};
 	models.collections.ready = $.getJSON(cfg.apiRoot);	// load configuration of urls
- 	models.collections.ready.done(function (data) {
-		models.collections.Sprints = Backbone.Collection.extend({
+	models.collections.ready.done(function (data) {
+		models.collections.Sprints = BaseCollection.extend({
 			model: models.models.Sprint,
 			url: data.sprints
 		});
 
 		models.sprints = new models.collections.Sprints();
 
-		models.collections.Tasks = Backbone.Collection.extend({
+		models.collections.Tasks = BaseCollection.extend({
 			model: models.models.Task,
 			url: data.tasks
 		});
 
 		models.tasks = new models.collections.Tasks();
 
-		models.collections.Users = Backbone.Collection.extend({
+		models.collections.Users = BaseCollection.extend({
 			model: models.models.User,
 			url: data.users
 		});

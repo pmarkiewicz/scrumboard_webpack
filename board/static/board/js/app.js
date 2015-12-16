@@ -19,7 +19,8 @@ require.config({
 
 require([
 	'backbone',
-	'js/router'
+	'js/router',
+	'js/ajax-utils'
 ], function(Backbone, router) {
 	"use strict";
 
