@@ -112,7 +112,7 @@ define([
 			return {sprints: models.sprints};
 		},
 
-		renderAddForm: function(ev) {
+		renderAddForm: function (ev) {
 			var view = new NewSprintView();
 			var link = $(ev.currentTarget);
 
@@ -120,7 +120,7 @@ define([
 			link.before(view.el);
 			link.hide();
 			view.render();
-			view.on("done", function() {
+			view.on("done", function () {
 				link.show();
 			})
 		}
@@ -183,13 +183,13 @@ define([
 
 			FormView.prototype.submit.apply(this, arguments);
 			attributes = this.serializeForm(this.form);
-			models.collections.ready.done(function () {
+			models.collections.ready.done($.proxy(function () {
 				models.sprints.create(attributes, {
 					wait: true,
 					success: $.proxy(this.success, this),
 					error: $.proxy(this.modelFailure, this)
 				});
-			}, this);
+			}), this);
 		},
 
 		success: function (model) {
@@ -201,27 +201,34 @@ define([
 	var SprintView = TemplateView.extend({
 		templateName: '#sprint-template',
 
-		initialize:function() {
+		initialize: function (options) {
 			TemplateView.prototype.initialize.apply(this, arguments);	// call base "class"
 			this.sprintId = options.sprintId;
 			this.sprint = null;
+			var self = this;
 
 			models.collections.ready.done(function () {
-				this.sprint = models.sprints.push({id: sprintId});
-
-				this.sprint.fetch({
+				self.sprint = models.sprints.push({id: self.sprintId});	// put current sprint in collection
+				self.sprint.fetch({				// SprintModel here
 					success: function () {
-						this.render();
+						self.render();
 					}
 				});
-			}, this);
+			});
+
 		},
 
-		getContext: function() {
+		getContext: function () {
 			return {sprint: this.sprint};
 		}
 	});
 
-	return {HomepageView: HomepageView, LoginView: LoginView, HeaderView: HeaderView, NewSprintView: NewSprintView, SprintView: SprintView};
+	return {
+		HomepageView: HomepageView,
+		LoginView: LoginView,
+		HeaderView: HeaderView,
+		NewSprintView: NewSprintView,
+		SprintView: SprintView
+	};
 
 });

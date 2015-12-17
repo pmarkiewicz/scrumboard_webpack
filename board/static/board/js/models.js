@@ -1,7 +1,7 @@
 define([
 	'jquery',
 	'backbone',
-	'js/config',
+	'js/config'
 ], function ($, Backbone, cfg) {
 	"use strict";
 
@@ -73,7 +73,7 @@ define([
 		Task: BaseModel.extend({}),
 		User: BaseModel.extend({
 			idAttributemodel: 'username'
-		}),
+		})
 	};
 
 	var BaseCollection = Backbone.Collection.extend({
@@ -86,6 +86,31 @@ define([
 			this._prev = response.previous;
 			this._count = response.count;
 			return response.result || [];
+		},
+
+		getOrFetch: function (id) {
+			var promise = new $.Deferred();
+			var model = this.get(id);
+
+			if (model) {
+				promise.resolve(model);			// call all attached callbacks
+				console.log('model resolved');
+			}
+			else {
+				model = this.push({id: id});
+				model.fetch({
+					success: function (model, response, options) {
+						promise.resolve(model);			// any doneCallbacks added by deferred.then() or deferred.done() are called.
+						console.log('model resolved (async)');
+					},
+					error: function (model, response, options) {
+						promise.reject(model, response);	// failCallbacks added by deferred.then() or deferred.fail() are called, http://api.jquery.com/deferred.reject/
+						console.log('model rejected (async)');
+					}
+				});
+			}
+
+			return promise;
 		}
 	});
 

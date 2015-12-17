@@ -8,7 +8,8 @@ define([
 
 	var AppRouter = Backbone.Router.extend({
 			routes: {
-				'': 'home'
+				'': 'home',
+				'sprint/:id': 'sprint'
 			},
 
 			initialize: function (options) {
@@ -23,6 +24,14 @@ define([
 			home: function () {
 				var view = new views.HomepageView({el: this.contentElement});
 
+				this.render(view);
+			},
+
+			sprint: function(id) {
+				var view = new views.SprintView({
+					el: this.contentElement,
+					sprintId: id
+				});
 				this.render(view);
 			},
 
