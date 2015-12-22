@@ -62,7 +62,7 @@ define([
 		submit: function (ev) {
 			ev.preventDefault();
 			this.form = $(ev.currentTarget);
-			this.clearErrors;
+			this.clearErrors();
 		},
 
 		failure: function (xhr, status, error) {
@@ -94,18 +94,22 @@ define([
 
 		initialize: function (options) {
 			TemplateView.prototype.initialize.apply(this, arguments);
+			var self = this;
 
 			models.collections.ready.done(function () {
 				var end = new Date();
 				end.setDate(end.getDate() - 7);
 				end = end.toISOString().replace(/T.*/g, '');
 
-				models.sprints.fetch({
-					data: {end_min: end},
-					success: $.proxy(this.render, this)
-				});
+				models.sprints
+					.fetch({
+						data: {end_min: end},
+					})
+					.done(function () {
+						self.render();
+					});
 
-			}, this);
+			});
 		},
 
 		getContext: function () {
@@ -209,13 +213,11 @@ define([
 
 			models.collections.ready.done(function () {
 				self.sprint = models.sprints.push({id: self.sprintId});	// put current sprint in collection
-				self.sprint.fetch({				// SprintModel here
-					success: function () {
+				self.sprint.fetch().done(function () {
 						self.render();
 					}
-				});
+				);
 			});
-
 		},
 
 		getContext: function () {
@@ -230,5 +232,4 @@ define([
 		NewSprintView: NewSprintView,
 		SprintView: SprintView
 	};
-
 });
