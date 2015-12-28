@@ -95,19 +95,21 @@ define([
 			if (model) {
 				promise.resolve(model);			// call all attached callbacks
 				console.log('model resolved');
+
+				return new $.Deferred().resolve(model);
 			}
 			else {
 				model = this.push({id: id});
-				model.fetch({
-					success: function (model, response, options) {
-						promise.resolve(model);			// any doneCallbacks added by deferred.then() or deferred.done() are called.
+				model.fetch()// we cannot return promise from fetch as we will get obj returned from ajax call, not model
+					.done(function () {
 						console.log('model resolved (async)');
-					},
-					error: function (model, response, options) {
-						promise.reject(model, response);	// failCallbacks added by deferred.then() or deferred.fail() are called, http://api.jquery.com/deferred.reject/
-						console.log('model rejected (async)');
-					}
-				});
+						promise.resolve(model);
+					})
+					.fail(function (jqXHR, textStatus, errorThrown) {
+							console.log('model rejected (async)');
+							promise.reject(model, textStatus);
+						}
+					);
 			}
 
 			return promise;

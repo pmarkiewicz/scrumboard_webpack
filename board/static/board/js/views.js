@@ -212,11 +212,23 @@ define([
 			var self = this;
 
 			models.collections.ready.done(function () {
-				self.sprint = models.sprints.push({id: self.sprintId});	// put current sprint in collection
-				self.sprint.fetch().done(function () {
+				/*
+				 self.sprint = models.sprints.push({id: self.sprintId});	// put current sprint in collection
+				 self.sprint.fetch().done(function () {
+				 self.render();
+				 }
+				 );
+				 */
+				models.sprints.getOrFetch(self.sprintId)
+					.done(function (sprint) {
+						self.sprint = sprint;
 						self.render();
-					}
-				);
+					})
+					.fail(function(sprint) {
+						self.sprint = sprint;
+						self.sprint.invalid = true;
+						self.render();
+					});
 			});
 		},
 
