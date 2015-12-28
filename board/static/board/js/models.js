@@ -85,7 +85,7 @@ define([
 			this._next = response.next;
 			this._prev = response.previous;
 			this._count = response.count;
-			return response.result || [];
+			return response || [];
 		},
 
 		getOrFetch: function (id) {
