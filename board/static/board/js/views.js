@@ -209,6 +209,7 @@ define([
 			TemplateView.prototype.initialize.apply(this, arguments);	// call base "class"
 			this.sprintId = options.sprintId;
 			this.sprint = null;
+			this.tasks = [];
 			var self = this;
 
 			this.statuses = {
@@ -254,15 +255,31 @@ define([
 
 		render: function () {
 			TemplateView.prototype.render.apply(this, arguments);
+
 			_.each(this.statuses, function (view, name) {
 				$('.tasks', this.$el).append(view.el);
 				view.delegateEvents();
 				view.render();
 			}, this);
+
+			_.each(this.tasks, function(task) {
+				this.renderTask(task);
+			}, this);
 		},
 
-		addTask: function() {
-			//TODO
+		addTask: function(task) {
+			if (task.inBacklog() || task.inSprint(this.sprint)) {
+				this.tasks[task.get("id")] = task;	// arrays in js can have gaps, they are not contignous
+				this.renderTask(task);
+			}
+		},
+
+		renderTask: function(task) {
+			var column = task.statusClass(),
+				container = this.statuses[column],
+				html = _.template('<div><%- task.get("name") %></div>');
+
+			$('.list', container.$el).append(html({task: task}));
 		}
 	});
 

@@ -68,8 +68,8 @@ define([
 
 	models.session = new Session();
 
-	var Sprint = Backbone.Model.extend({
-		fetchTasks: function() {
+	var Sprint = BaseModel.extend({
+		fetchTasks: function () {
 			var links = this.get("links")
 			if (links && links.tasks) {
 				models.tasks.fetch({url: links.tasks, remove: false});	// do not remove existing
@@ -77,9 +77,36 @@ define([
 		}
 	});
 
+	var Task = BaseModel.extend({
+		statusClass: function () {
+			var sprint = this.get('sprint'),
+				status_id = this.get('status'),
+				status;
+
+			if (!sprint) {
+				status = 'unassigned';
+			}
+			else {
+				status = ['todo', 'active', 'testing', 'done'][status_id - 1];
+			}
+
+			return status;
+		},
+
+		inBacklog: function () {
+			//  determines what it means for the task to be on the backlog
+			return !this.get('sprint');
+		},
+
+		inSprint: function (sprint) {
+			// determines if the task is in the given sprint
+			return sprint.get('id') == this.get('sprint');
+		}
+	});
+
 	models.models = {
 		Sprint: Sprint,
-		Task: BaseModel.extend({}),
+		Task: Task,
 		User: BaseModel.extend({
 			idAttributemodel: 'username'
 		})
@@ -139,7 +166,7 @@ define([
 			model: models.models.Task,
 			url: data.tasks,
 
-			getBacklog: function() {
+			getBacklog: function () {
 				this.fetch({remove: false, data: {backlog: 'True'}});	// filter
 			}
 		});
