@@ -68,8 +68,17 @@ define([
 
 	models.session = new Session();
 
+	var Sprint = Backbone.Model.extend({
+		fetchTasks: function() {
+			var links = this.get("links")
+			if (links && links.tasks) {
+				models.tasks.fetch({url: links.tasks, remove: false});	// do not remove existing
+			}
+		}
+	});
+
 	models.models = {
-		Sprint: BaseModel.extend({}),
+		Sprint: Sprint,
 		Task: BaseModel.extend({}),
 		User: BaseModel.extend({
 			idAttributemodel: 'username'
@@ -128,7 +137,11 @@ define([
 
 		models.collections.Tasks = BaseCollection.extend({
 			model: models.models.Task,
-			url: data.tasks
+			url: data.tasks,
+
+			getBacklog: function() {
+				this.fetch({remove: false, data: {backlog: 'True'}});	// filter
+			}
 		});
 
 		models.tasks = new models.collections.Tasks();

@@ -211,6 +211,13 @@ define([
 			this.sprint = null;
 			var self = this;
 
+			this.statuses = {
+				unassigned: new StatusView({sprint: null, status: 1, title: 'Backlog'}),
+				todo: new StatusView({sprint: this.sprintId, status: 1, title: 'Not Started'}),
+				active: new StatusView({sprint: this.sprintId, status: 2, title: 'In Development'}),
+				testing: new StatusView({sprint: this.sprintId, status: 3, title: 'In Testing'}),
+				done: new StatusView({sprint: this.sprintId, status: 4, title: 'Completed'})
+			};
 			models.collections.ready.done(function () {
 				/*
 				 self.sprint = models.sprints.push({id: self.sprintId});	// put current sprint in collection
@@ -219,21 +226,58 @@ define([
 				 }
 				 );
 				 */
+				models.tasks.on("add", self.addTask, self);
+
 				models.sprints.getOrFetch(self.sprintId)
 					.done(function (sprint) {
 						self.sprint = sprint;
 						self.render();
+						// Add any current tasks
+						models.tasks.each(self.addTask, self);
+						// Fetch tasks for the current sprint
+						sprint.fetchTasks();
 					})
-					.fail(function(sprint) {
+					.fail(function (sprint) {
 						self.sprint = sprint;
 						self.sprint.invalid = true;
 						self.render();
 					});
+
+					// Fetch unassigned tasks
+					models.tasks.getBacklog();
 			});
 		},
 
 		getContext: function () {
 			return {sprint: this.sprint};
+		},
+
+		render: function () {
+			TemplateView.prototype.render.apply(this, arguments);
+			_.each(this.statuses, function (view, name) {
+				$('.tasks', this.$el).append(view.el);
+				view.delegateEvents();
+				view.render();
+			}, this);
+		},
+
+		addTask: function() {
+			//TODO
+		}
+	});
+
+	var StatusView = TemplateView.extend({
+		tagName: 'section',
+		className: 'status',
+		templateName: '#status-template',
+		initialize: function (options) {
+			TemplateView.prototype.initialize.apply(this, arguments);
+			this.sprint = options.sprint;
+			this.status = options.status;
+			this.title = options.title;
+		},
+		getContext: function () {
+			return {sprint: this.sprint, title: this.title};
 		}
 	});
 
