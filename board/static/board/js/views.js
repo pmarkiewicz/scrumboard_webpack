@@ -27,10 +27,17 @@ define([
 
 	var FormView = TemplateView.extend({
 		events: {
-			'submit form': 'submit'
+			'submit form': 'submit',
+			'click button.cancel': 'done'
 		},
 
 		errorTemplate: _.template('<span class="error"><%- msg %></span>'),
+
+		initialize: function (options) {
+			TemplateView.prototype.initialize.apply(this, arguments);
+
+			_.bindAll(this, "failure", "modelFailure");
+		},
 
 		clearErrors: function () {
 			$('.error', this.form).remove();
@@ -68,6 +75,8 @@ define([
 		failure: function (xhr, status, error) {
 			var errors = xhr.responseJSON || [{msg: xhr.statusText}];
 			this.showErrors(errors);
+
+			console.log("failure");
 		},
 
 		done: function (ev) {
@@ -82,6 +91,7 @@ define([
 		modelFailure: function (xhr, status, error) {
 			var errors = xhr.responseJSON || [{msg: xhr.statusText}];
 			this.showErrors(errors);
+			console.log("model failure");
 		}
 	});
 
@@ -98,7 +108,7 @@ define([
 
 			models.collections.ready.done(function () {
 				var end = new Date();
-				end.setDate(end.getDate() - 7);
+				end.setDate(end.getDate() - 17);
 				end = end.toISOString().replace(/T.*/g, '');
 
 				models.sprints
@@ -177,7 +187,7 @@ define([
 
 		events: _.extend(
 			{
-				'click button.cancel': 'done'
+				// 'click button.cancel': 'done' -- moved to base class
 			},
 			FormView.prototype.events		// also handle a cancel button to call the done method defined by the FormView.
 		),
@@ -209,11 +219,11 @@ define([
 			TemplateView.prototype.initialize.apply(this, arguments);	// call base "class"
 			this.sprintId = options.sprintId;
 			this.sprint = null;
-			this.tasks = [];
+			this.tasks = {};	// this cannot be array, see PROBLEM below
 			var self = this;
 
 			this.statuses = {
-				unassigned: new StatusView({sprint: null, status: 1, title: 'Backlog'}),
+				unassigned: new StatusView({sprint: null, status: 0, title: 'Backlog'}),
 				todo: new StatusView({sprint: this.sprintId, status: 1, title: 'Not Started'}),
 				active: new StatusView({sprint: this.sprintId, status: 2, title: 'In Development'}),
 				testing: new StatusView({sprint: this.sprintId, status: 3, title: 'In Testing'}),
@@ -244,8 +254,8 @@ define([
 						self.render();
 					});
 
-					// Fetch unassigned tasks
-					models.tasks.getBacklog();
+				// Fetch unassigned tasks
+				models.tasks.getBacklog();
 			});
 		},
 
@@ -262,24 +272,77 @@ define([
 				view.render();
 			}, this);
 
-			_.each(this.tasks, function(task) {
-				this.renderTask(task);
+			_.each(this.tasks, function (view, taskId, list) {	// PROBLEM: Treats all sparse array-likes as if they were dense.
+				var task = models.tasks.get(taskId);
+				view.remove();
+				this.tasks[taskId] = this.renderTask(task);
 			}, this);
 		},
 
-		addTask: function(task) {
+		addTask: function (task) {
 			if (task.inBacklog() || task.inSprint(this.sprint)) {
-				this.tasks[task.get("id")] = task;	// arrays in js can have gaps, they are not contignous
-				this.renderTask(task);
+				var taskId = task.get("id");
+				this.tasks[taskId] = this.renderTask(task);	// arrays in js can have gaps, they are not contignous
 			}
 		},
 
-		renderTask: function(task) {
-			var column = task.statusClass(),
-				container = this.statuses[column],
-				html = _.template('<div><%- task.get("name") %></div>');
+		renderTask: function (task) {
+			if (!task) {
+				debugger;
+			}
+			/*var column = task.statusClass(),
+			 container = this.statuses[column],
+			 html = _.template('<div><%- task.get("name") %></div>');	// bug in book was here
 
-			$('.list', container.$el).append(html({task: task}));
+			 $('.list', container.$el).append(html({task: task}));*/
+			var view = new TaskItemView({task: task});
+
+			_.each(this.statuses, function (container, name) {
+				if (container.sprint == task.get("sprint") &&
+					container.status == task.get("status")) {
+					container.addTask(view);
+				}
+			});
+
+			view.render();
+			return view;
+		}
+	});
+
+	var TaskItemView = TemplateView.extend({
+		tagName: "div",	// this is redundant as by default it's div
+		className: "task-item",
+		templateName: "#task-item-template",
+
+		events: {
+			'click': 'details'
+		},
+
+		initialize: function (options) {
+			TemplateView.prototype.initialize.apply(this, arguments);
+
+			this.task = options.task;
+			this.task.on('change', this.render, this);	// model
+			this.task.on('remove', this.remove, this);
+		},
+
+		getContext: function () {
+			return {task: this.task};
+		},
+
+		render: function () {
+			TemplateView.prototype.render.apply(this, arguments);
+			this.$el.css("order", this.task.get("order"));
+		},
+
+		details: function () {
+			var view = new TaskDetailView({task: this.task});
+			this.$el.before(view.el);
+			this.$el.hide();	// hide current view
+			view.render();
+			view.on("done", function () {
+				this.$el.show;
+			}, this);
 		}
 	});
 
@@ -287,14 +350,143 @@ define([
 		tagName: 'section',
 		className: 'status',
 		templateName: '#status-template',
+
+		events: {
+			'click button.add': 'renderAddForm'
+		},
+
 		initialize: function (options) {
 			TemplateView.prototype.initialize.apply(this, arguments);
 			this.sprint = options.sprint;
 			this.status = options.status;
 			this.title = options.title;
 		},
+
 		getContext: function () {
 			return {sprint: this.sprint, title: this.title};
+		},
+
+		renderAddForm: function (evt) {
+			var view = new AddTaskView(),
+				link = $(evt.currentTarget);
+
+			event.preventDefault();
+			link.before(view.el);
+			link.hide();
+			view.render();
+			view.on('done', function () {
+				link.show();
+			});
+		},
+
+		addTask: function (view) {
+			$('.list', this.$el).append(view.el);
+		}
+	});
+
+	var AddTaskView = FormView.extend({
+		templateName: "#new-task-template",
+
+		events: _.extend({
+			//"click button.cancel": "done" -- moved to base class
+		}, FormView.prototype.events),
+
+		submit: function (evt) {
+			var self = this,
+				attributtes = {};
+
+			FormView.prototype.submit.apply(this, arguments);
+
+			attributtes = this.serializeForm(this.form);
+			models.collections.ready.done(function () {
+				models.tasks.create(attributtes)
+					.done(function () {
+						self.success.apply(self, arguments);
+					})
+					.fail(function () {
+						self.modelFailure.apply(self, arguments);
+					});
+			});
+		},
+
+		success: function (model, resp, options) {
+			this.done();
+		}
+	});
+
+	var TaskDetailView = FormView.extend({
+		tagName: "div",		// redundant
+		className: "task-details",
+		templateName: "#task-detail-template",
+
+		events: _.extend({
+			'blur [data-field][contenteditable=true]': 'editField'
+		}, FormView.prototype.events),
+
+		initialize: function (options) {
+			FormView.prototype.initialize.apply(this, arguments);
+			this.task = options.task;
+			this.changes = {};
+
+			_.bindAll(this, "success");
+
+			$("button.save", this.$el).hide();
+			this.task.on('change', this.render, this);
+			this.task.on('remove', this.remove, this);
+		},
+
+		getContext: function () {
+			return {task: this.task, empty: "-----"};
+		},
+
+		submit: function () {
+			FormView.prototype.submit.apply(this, arguments);
+			this.task.save(this.changes, {wait: true})
+				.done(this.success)
+				.fail(this.modelFailure);
+		},
+
+		success: function (model) {
+			this.changes = {};
+			$("button.save", this.$el).hide();
+		},
+
+		editField: function (evt) {
+			var $this = $(evt.currentTarget),
+				value = $this.text().replace(/^\s+|\s+$/g, ''),	// strip
+				field = $this.data('field');	// get data-field
+
+			this.changes[field] = value;
+			$("button.save", this.$el).show();
+		},
+
+		/*
+		 default FormView.showErrors won’t work
+		 to display the errors from the API. The FormView.showErrors relied on the <input>
+		 and <label> tags to have names matching the model names. These are not present in
+		 the current template
+		 */
+		showErrors: function (errors) {
+			_.map(errors, function (fieldErrors, name) {
+				var field = $('[data-field=' + name + ']', this.$el);
+				if (field.length === 0) {
+					field = $('[data-field]', this.$el).first();
+				}
+
+				var appendError = function (msg) {
+					var parent = field.parent(".with-label"),	// parent div with label
+						error = this.errorTemplate({msg: msg});	// errorTemplate is defined in base class as inline
+
+					if (parent.length === 0) {
+						field.before(error);
+					}
+					else {
+						parent.before(error);
+					}
+				};
+
+				_.map(fieldErrors, appendError, this);
+			}, this);
 		}
 	});
 
@@ -305,4 +497,5 @@ define([
 		NewSprintView: NewSprintView,
 		SprintView: SprintView
 	};
-});
+})
+;
