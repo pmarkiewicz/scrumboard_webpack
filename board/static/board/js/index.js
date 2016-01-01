@@ -1,12 +1,9 @@
 require('normalize.css');
 require('../css/board.css');
-require('./ajax-utils.js');
+import './ajax-utils.es6';
+
 require(['./router.js'], function (router) {
-	console.log('works');
-
-	"use strict";
-
-	var router = new router.Router();
+	let rt = new router.Router();
 });
 
 

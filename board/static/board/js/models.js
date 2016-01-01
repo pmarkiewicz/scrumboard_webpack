@@ -1,16 +1,16 @@
-define([
-	'jquery',
-	'backbone',
-	'./config.js'
-], function ($, Backbone, cfg) {
+import $ from 'jquery';
+import Backbone from 'backbone';
+import cfg from './config.js';
+
+define([], function () {
 	"use strict";
 
-	var models = {};
+	let models = {};
 
-	var BaseModel = Backbone.Model.extend({
+	let BaseModel = Backbone.Model.extend({
 		url: function () {
-			var links = this.get('links');
-			var url = links && links.self;
+			let links = this.get('links');
+			let url = links && links.self;
 
 			if (!url) {
 				url = Backbone.Model.prototype.url.call(this);
@@ -20,7 +20,7 @@ define([
 		}
 	});
 
-	var Session = Backbone.Model.extend({
+	let Session = Backbone.Model.extend({
 		defaults: {
 			token: null
 		},
@@ -125,8 +125,8 @@ define([
 		},
 
 		getOrFetch: function (id) {
-			var promise = new $.Deferred();
-			var model = this.get(id);
+			let promise = new $.Deferred();
+			let model = this.get(id);
 
 			if (model) {
 				promise.resolve(model);			// call all attached callbacks

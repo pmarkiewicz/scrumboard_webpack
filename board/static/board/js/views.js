@@ -1,11 +1,13 @@
+import $ from 'jquery';
+import cfg from './config.js';
+
 define([
-	'jquery',
 	'backbone',
 	'underscore',
 	'./models.js',
-	'./config.js'
-], function ($, Backbone, _, models, cfg) {
+], function (Backbone, _, models) {
 	"use strict";
+
 
 	var TemplateView = Backbone.View.extend({
 		templateName: '',

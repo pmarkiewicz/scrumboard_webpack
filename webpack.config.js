@@ -10,6 +10,13 @@ module.exports = {
 		publicPath: "/static/",
 		filename: "bundle-[hash].js"
 	},
+	debug: true,
+	devtool: 'source-map',
+
+	stats: {
+		colors: true,
+		reasons: true
+	},
 
 	plugins: [
 		new BundleTracker({filename: './webpack-stats.json'}),
@@ -18,7 +25,7 @@ module.exports = {
 	module: {
 		loaders: [
 			{test: /\.css$/, loader: "style!css!"}, //, exclude: /node_modules/, },
-			{test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader'}
+			{test: /\.(js|es6|jsx)$/, exclude: /node_modules/, loader: 'babel?presets[]=react,presets[]=es2015'}
 		]
 	}
 }

@@ -1,13 +1,14 @@
+import $ from 'jquery';
+import _ from 'underscore';
+import Backbone from 'backbone';
+
 define([
-	'jquery',
-	'underscore',
-	'backbone',
 	'./views.js',
 	'./models.js'
-], function ($, _, Backbone, views, models) {
+], function (views, models) {
 	"use strict";
 
-	var AppRouter = Backbone.Router.extend({
+	let AppRouter = Backbone.Router.extend({
 			routes: {
 				'': 'home',
 				'sprint/:id': 'sprint'
@@ -23,13 +24,13 @@ define([
 			},
 
 			home: function () {
-				var view = new views.HomepageView({el: this.contentElement});
+				let view = new views.HomepageView({el: this.contentElement});
 
 				this.render(view);
 			},
 
 			sprint: function(id) {
-				var view = new views.SprintView({
+				let view = new views.SprintView({
 					el: this.contentElement,
 					sprintId: id
 				});
@@ -38,7 +39,7 @@ define([
 
 			route: function (route, name, callback) {
 				// Override default route to enforce login on every page
-				var login;
+				let login;
 
 				callback = callback || this[name];	// if there is no callback we retrieve one based on name
 

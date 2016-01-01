@@ -1,11 +1,4 @@
-define([
-	'jquery'
-], function($) {
-	"use strict";
+let config = document.getElementById('config');
+let cfg = JSON.parse(config.textContent);
 
-	var config = $('#config');
-	var cfg = JSON.parse(config.text());
-
-	return cfg;
-});
-
+export { cfg as default };
