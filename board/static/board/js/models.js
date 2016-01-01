@@ -1,7 +1,7 @@
 define([
 	'jquery',
 	'backbone',
-	'js/config'
+	'./config.js'
 ], function ($, Backbone, cfg) {
 	"use strict";
 

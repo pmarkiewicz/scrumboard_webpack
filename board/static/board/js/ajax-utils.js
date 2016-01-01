@@ -1,6 +1,6 @@
 define([
 	'jquery',
-	'vendor/js.cookie'
+	'js-cookie'
 ], function ($, Cookies) {
 	"use strict";
 	var csrftoken = Cookies.get('csrftoken');

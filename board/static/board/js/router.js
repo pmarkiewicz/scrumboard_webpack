@@ -1,9 +1,10 @@
 define([
 	'jquery',
+	'underscore',
 	'backbone',
-	'js/views',
-	'js/models'
-], function ($, Backbone, views, models) {
+	'./views.js',
+	'./models.js'
+], function ($, _, Backbone, views, models) {
 	"use strict";
 
 	var AppRouter = Backbone.Router.extend({

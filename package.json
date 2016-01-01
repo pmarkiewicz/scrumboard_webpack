@@ -1,0 +1,39 @@
+{
+  "name": "scrumboard",
+  "version": "1.0.0",
+  "description": "scrumboard from lightweigth django with webpack",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack  --progress --colors",
+    "watch": "webpack  --progress --colors --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pmarkiewicz/scrumboard.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pmarkiewicz/scrumboard/issues"
+  },
+  "homepage": "https://github.com/pmarkiewicz/scrumboard#readme",
+  "dependencies": {
+    "backbone": "^1.2.3",
+    "jquery": "^2.1.4",
+    "js-cookie": "^2.1.0",
+    "normalize.css": "^3.0.3",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "babel": "^6.3.26",
+    "babel-core": "^6.3.26",
+    "babel-loader": "^6.2.0",
+    "css-loader": "^0.23.1",
+    "react": "^0.14.5",
+    "style-loader": "^0.13.0",
+    "webpack": "^1.12.9",
+    "webpack-bundle-tracker": "0.0.9",
+    "webpack-dev-server": "^1.14.0"
+  }
+}

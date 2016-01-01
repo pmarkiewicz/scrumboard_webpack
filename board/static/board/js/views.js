@@ -2,8 +2,8 @@ define([
 	'jquery',
 	'backbone',
 	'underscore',
-	'js/models',
-	'js/config'
+	'./models.js',
+	'./config.js'
 ], function ($, Backbone, _, models, cfg) {
 	"use strict";
 

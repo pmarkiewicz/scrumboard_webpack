@@ -1,4 +1,6 @@
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+
 <!DOCTYPE html>
 <html class="no-js">
 <head>
@@ -7,8 +9,8 @@
 	<title>Scrum Board</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="{% static 'board/vendor/normalize.css' %}">
-	<link rel="stylesheet" href="{% static 'board/css/board.css' %}">
+	<!-- link rel="stylesheet" href="{% static 'board/vendor/normalize.css' %}" -->
+	<!-- link rel="stylesheet" href="{% static 'board/css/board.css' %}" -->
 	<style>
 		.large-screen {
 			top: calc(50% - 45px);
@@ -144,24 +146,10 @@
 		"apiRoot": "{% url 'api-root' %}",
  		"apiLogin": "{% url 'api-token' %}"
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </script>
-<script async src="{% static 'board/vendor/require.js' %}" data-main="{% static 'board/js/app.js' %}"></script>
+
+{% render_bundle 'main' %}
+<!--script async src="{% static 'bundle.js' %}" %}"></script-->
+<!--script async src="{% static 'board/vendor/require.js' %}" data-main="{% static 'board/js/app.js' %}"></script-->
 </body>
 </html>
