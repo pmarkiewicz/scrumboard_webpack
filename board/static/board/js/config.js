@@ -8,3 +8,4 @@ define([
 
 	return cfg;
 });
+
