@@ -1,11 +1,11 @@
 import $ from 'jquery';
 import cfg from './config.js';
+import models from './models.es6';
 
 define([
 	'backbone',
 	'underscore',
-	'./models.js',
-], function (Backbone, _, models) {
+], function (Backbone, _) {
 	"use strict";
 
 

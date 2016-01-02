@@ -1,11 +1,11 @@
 import $ from 'jquery';
 import _ from 'underscore';
 import Backbone from 'backbone';
+import models from './models.es6';
 
 define([
 	'./views.js',
-	'./models.js'
-], function (views, models) {
+], function (views) {
 	"use strict";
 
 	let AppRouter = Backbone.Router.extend({
