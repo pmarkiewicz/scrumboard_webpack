@@ -20,12 +20,18 @@ module.exports = {
 
 	plugins: [
 		new BundleTracker({filename: './webpack-stats.json'}),
+
+		// ejs compiled templates needs global _ symbol
+		new webpack.ProvidePlugin({
+			_: "underscore"
+		})
 	],
 
 	module: {
 		loaders: [
 			{test: /\.css$/, loader: "style!css!"}, //, exclude: /node_modules/, },
-			{test: /\.(js|es6|jsx)$/, exclude: /node_modules/, loader: 'babel?presets[]=react,presets[]=es2015'}
+			{test: /\.(js|es6|jsx)$/, exclude: /node_modules/, loader: 'babel?presets[]=react,presets[]=es2015'},
+			{test: /\.ejs$/, loader: "ejs"}
 		]
 	}
 }

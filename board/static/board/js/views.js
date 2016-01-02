@@ -3,6 +3,7 @@ import _ from 'underscore';
 import Backbone from 'backbone';
 import cfg from './config.es6';
 import models from './models.es6';
+import taskItemTemplate from '../ejs/task-item-template.ejs'
 
 define([], function () {
 	"use strict";
@@ -312,8 +313,8 @@ define([], function () {
 		},
 
 		initialize: function (options) {
-			TemplateView.prototype.initialize.apply(this, arguments);
-
+			//TemplateView.prototype.initialize.apply(this, arguments);
+			this.template = taskItemTemplate;
 			this.task = options.task;
 			this.task.on('change', this.render, this);	// model
 			this.task.on('remove', this.remove, this);
