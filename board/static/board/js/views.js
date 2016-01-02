@@ -1,13 +1,11 @@
 import $ from 'jquery';
-import cfg from './config.js';
+import _ from 'underscore';
+import Backbone from 'backbone';
+import cfg from './config.es6';
 import models from './models.es6';
 
-define([
-	'backbone',
-	'underscore',
-], function (Backbone, _) {
+define([], function () {
 	"use strict";
-
 
 	var TemplateView = Backbone.View.extend({
 		templateName: '',
@@ -499,5 +497,4 @@ define([
 		NewSprintView: NewSprintView,
 		SprintView: SprintView
 	};
-})
-;
+});

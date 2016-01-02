@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import Backbone from 'backbone';
-import cfg from './config.js';
+import cfg from './config.es6';
 
 "use strict";
 

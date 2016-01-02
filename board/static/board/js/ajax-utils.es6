@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 "use strict";
 
 const csrftoken = Cookies.get('csrftoken');
+console.log(csrftoken);
 
 // TODO: this should be moved to app
 // code form djando documentation
