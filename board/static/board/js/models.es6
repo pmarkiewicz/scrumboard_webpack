@@ -6,40 +6,43 @@ import cfg from './config.es6';
 
 let models = {};
 
-let BaseModel = Backbone.Model.extend({
-	url: function () {
+class BaseModel extends Backbone.Model {
+	url() {
 		let links = this.get('links');
-		let url = links && links.self;
+		let newUrl = links && links.self;
 
-		if (!url) {
-			url = Backbone.Model.prototype.url.call(this);
+		if (!newUrl) {
+			console.log('super.url');
+			newUrl = super.url();
+			//url = Backbone.Model.prototype.url.call(this);
 		}
 
-		return url;
+		return newUrl;
 	}
-});
+}
 
-let Session = Backbone.Model.extend({
-	defaults: {
-		token: null
-	},
+class Session extends Backbone.Model {
+	get defaults() {
+		console.log('session defaults');
+		return {token: null};
+	}
 
-	initialize: function (options) {
+	initialize(options) {
 		this.options = options;
 
 		$.ajaxPrefilter($.proxy(this._setupAuth, this));
 		this.load();
-	},
+	}
 
-	load: function () {
+	load() {
 		const token = localStorage.apiToken;
 
 		if (token) {
 			this.set('token', token);
 		}
-	},
+	}
 
-	save: function (token) {
+	save(token) {
 		this.set('token', token);
 
 		if (token === null) {
@@ -48,39 +51,39 @@ let Session = Backbone.Model.extend({
 		else {
 			localStorage.apiToken = token;
 		}
-	},
+	}
 
-	delete: function () {
+	delete() {
 		this.save(null);
-	},
+	}
 
-	authenticated: function () {
+	authenticated() {
 		return this.get('token') !== null;
-	},
+	}
 
-	_setupAuth: function (settings, originalOptions, xhr) {
+	_setupAuth(settings, originalOptions, xhr) {
 		if (this.authenticated()) {
 			const token = this.get('token');
 			xhr.setRequestHeader('Authorization', `Token ${token}`);
 		}
 	}
-});
+}
 
 models.session = new Session();
 
-let Sprint = BaseModel.extend({
-	fetchTasks: function () {
+class Sprint extends BaseModel {
+	fetchTasks() {
 		let links = this.get("links")
 		if (links && links.tasks) {
 			models.tasks.fetch({url: links.tasks, remove: false});	// do not remove existing
 		}
 	}
-});
+}
 
-let Task = BaseModel.extend({
-	statusClass: function () {
+class Task extends BaseModel {
+	statusClass() {
 		const sprint = this.get('sprint'),
-			  status_id = this.get('status');
+			status_id = this.get('status');
 		let status;
 
 		if (!sprint) {
@@ -91,18 +94,18 @@ let Task = BaseModel.extend({
 		}
 
 		return status;
-	},
+	}
 
-	inBacklog: function () {
+	inBacklog() {
 		//  determines what it means for the task to be on the backlog
 		return !this.get('sprint');
-	},
+	}
 
-	inSprint: function (sprint) {
+	inSprint(sprint) {
 		// determines if the task is in the given sprint
 		return sprint.get('id') == this.get('sprint');
 	}
-});
+}
 
 models.models = {
 	Sprint: Sprint,

@@ -7,7 +7,7 @@ import models from './models.es6';
 define([], function () {
 	"use strict";
 
-	var TemplateView = Backbone.View.extend({
+	let TemplateView = Backbone.View.extend({
 		templateName: '',
 
 		initialize: function () {
@@ -15,7 +15,7 @@ define([], function () {
 		},
 
 		render: function () {
-			var context = this.getContext(),
+			let context = this.getContext(),
 				html = this.template(context);
 			this.$el.html(html);
 		},
@@ -25,7 +25,7 @@ define([], function () {
 		}
 	});
 
-	var FormView = TemplateView.extend({
+	let FormView = TemplateView.extend({
 		events: {
 			'submit form': 'submit',
 			'click button.cancel': 'done'
@@ -45,8 +45,8 @@ define([], function () {
 
 		showErrors: function (errors) {
 			_.map(errors, function (fieldErrors, name) {
-				var field = $(':input[name="' + name + '"]', this.form);
-				var label = $('label[for=' + field.attr('id') + ']', this.form);
+				let field = $(':input[name="' + name + '"]', this.form);
+				let label = $('label[for=' + field.attr('id') + ']', this.form);
 
 				if (label.length === 0) {
 					label = $('label', this.form).first();
@@ -95,7 +95,7 @@ define([], function () {
 		}
 	});
 
-	var HomepageView = TemplateView.extend({
+	let HomepageView = TemplateView.extend({
 		templateName: "#home-template",
 
 		events: {
@@ -104,10 +104,10 @@ define([], function () {
 
 		initialize: function (options) {
 			TemplateView.prototype.initialize.apply(this, arguments);
-			var self = this;
+			let self = this;
 
 			models.collections.ready.done(function () {
-				var end = new Date();
+				let end = new Date();
 				end.setDate(end.getDate() - 17);
 				end = end.toISOString().replace(/T.*/g, '');
 
@@ -127,8 +127,8 @@ define([], function () {
 		},
 
 		renderAddForm: function (ev) {
-			var view = new NewSprintView();
-			var link = $(ev.currentTarget);
+			let view = new NewSprintView();
+			let link = $(ev.currentTarget);
 
 			ev.preventDefault();
 			link.before(view.el);
@@ -140,12 +140,12 @@ define([], function () {
 		}
 	});
 
-	var LoginView = FormView.extend({
+	let LoginView = FormView.extend({
 		id: 'login',
 		templateName: '#login-template',
 
 		submit: function (ev) {
-			var data = {};
+			let data = {};
 
 			FormView.prototype.submit.apply(this, arguments);
 			data = this.serializeForm(this.form);
@@ -161,7 +161,7 @@ define([], function () {
 		}
 	});
 
-	var HeaderView = TemplateView.extend({
+	let HeaderView = TemplateView.extend({
 		tagName: 'header',
 		className: 'nav-header',
 		templateName: '#header-template',
@@ -181,7 +181,7 @@ define([], function () {
 		}
 	});
 
-	var NewSprintView = FormView.extend({
+	let NewSprintView = FormView.extend({
 		templateName: '#new-sprint-template',
 		className: 'new-sprint',
 
@@ -193,7 +193,7 @@ define([], function () {
 		),
 
 		submit: function (ev) {
-			var attributes = {};
+			let attributes = {};
 
 			FormView.prototype.submit.apply(this, arguments);
 			attributes = this.serializeForm(this.form);
@@ -212,7 +212,7 @@ define([], function () {
 		}
 	});
 
-	var SprintView = TemplateView.extend({
+	let SprintView = TemplateView.extend({
 		templateName: '#sprint-template',
 
 		initialize: function (options) {
@@ -230,13 +230,6 @@ define([], function () {
 				done: new StatusView({sprint: this.sprintId, status: 4, title: 'Completed'})
 			};
 			models.collections.ready.done(function () {
-				/*
-				 self.sprint = models.sprints.push({id: self.sprintId});	// put current sprint in collection
-				 self.sprint.fetch().done(function () {
-				 self.render();
-				 }
-				 );
-				 */
 				models.tasks.on("add", self.addTask, self);
 
 				models.sprints.getOrFetch(self.sprintId)
@@ -273,7 +266,7 @@ define([], function () {
 			}, this);
 
 			_.each(this.tasks, function (view, taskId, list) {	// PROBLEM: Treats all sparse array-likes as if they were dense.
-				var task = models.tasks.get(taskId);
+				const task = models.tasks.get(taskId);
 				view.remove();
 				this.tasks[taskId] = this.renderTask(task);
 			}, this);
@@ -281,7 +274,7 @@ define([], function () {
 
 		addTask: function (task) {
 			if (task.inBacklog() || task.inSprint(this.sprint)) {
-				var taskId = task.get("id");
+				const taskId = task.get("id");
 				this.tasks[taskId] = this.renderTask(task);	// arrays in js can have gaps, they are not contignous
 			}
 		},
@@ -295,7 +288,7 @@ define([], function () {
 			 html = _.template('<div><%- task.get("name") %></div>');	// bug in book was here
 
 			 $('.list', container.$el).append(html({task: task}));*/
-			var view = new TaskItemView({task: task});
+			let view = new TaskItemView({task: task});
 
 			_.each(this.statuses, function (container, name) {
 				if (container.sprint == task.get("sprint") &&
@@ -336,7 +329,7 @@ define([], function () {
 		},
 
 		details: function () {
-			var view = new TaskDetailView({task: this.task});
+			let view = new TaskDetailView({task: this.task});
 			this.$el.before(view.el);
 			this.$el.hide();	// hide current view
 			view.render();
@@ -367,7 +360,7 @@ define([], function () {
 		},
 
 		renderAddForm: function (evt) {
-			var view = new AddTaskView(),
+			let view = new AddTaskView(),
 				link = $(evt.currentTarget);
 
 			event.preventDefault();
@@ -392,7 +385,7 @@ define([], function () {
 		}, FormView.prototype.events),
 
 		submit: function (evt) {
-			var self = this,
+			let self = this,
 				attributtes = {};
 
 			FormView.prototype.submit.apply(this, arguments);
@@ -452,7 +445,7 @@ define([], function () {
 		},
 
 		editField: function (evt) {
-			var $this = $(evt.currentTarget),
+			let $this = $(evt.currentTarget),
 				value = $this.text().replace(/^\s+|\s+$/g, ''),	// strip
 				field = $this.data('field');	// get data-field
 
@@ -468,13 +461,13 @@ define([], function () {
 		 */
 		showErrors: function (errors) {
 			_.map(errors, function (fieldErrors, name) {
-				var field = $('[data-field=' + name + ']', this.$el);
+				let field = $('[data-field=' + name + ']', this.$el);
 				if (field.length === 0) {
 					field = $('[data-field]', this.$el).first();
 				}
 
-				var appendError = function (msg) {
-					var parent = field.parent(".with-label"),	// parent div with label
+				let appendError = function (msg) {
+					let parent = field.parent(".with-label"),	// parent div with label
 						error = this.errorTemplate({msg: msg});	// errorTemplate is defined in base class as inline
 
 					if (parent.length === 0) {
@@ -498,3 +491,5 @@ define([], function () {
 		SprintView: SprintView
 	};
 });
+
+
