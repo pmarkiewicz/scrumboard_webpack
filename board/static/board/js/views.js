@@ -4,6 +4,7 @@ import Backbone from 'backbone';
 import cfg from './config.es6';
 import models from './models.es6';
 import taskItemTemplate from '../ejs/task-item-template.ejs'
+import statusTemplate from '../ejs/status-template.ejs'
 
 define([], function () {
 	"use strict";
@@ -306,7 +307,7 @@ define([], function () {
 	var TaskItemView = TemplateView.extend({
 		tagName: "div",	// this is redundant as by default it's div
 		className: "task-item",
-		templateName: "#task-item-template",
+		//templateName: "#task-item-template",
 
 		events: {
 			'click': 'details'
@@ -343,14 +344,15 @@ define([], function () {
 	var StatusView = TemplateView.extend({
 		tagName: 'section',
 		className: 'status',
-		templateName: '#status-template',
+		//templateName: '#status-template',
 
 		events: {
 			'click button.add': 'renderAddForm'
 		},
 
 		initialize: function (options) {
-			TemplateView.prototype.initialize.apply(this, arguments);
+			//TemplateView.prototype.initialize.apply(this, arguments);
+			this.template = statusTemplate;
 			this.sprint = options.sprint;
 			this.status = options.status;
 			this.title = options.title;
